@@ -4,10 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SD v1.5 VRAM Estimator</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link id="app-stylesheet" rel="stylesheet" href="/static/style.css">
+    <script>
+        (function () {
+            var fallbackCSS = "*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter','Segoe UI',Tahoma,sans-serif;background:#f5f5f5;color:#111;min-height:100vh;padding:32px 16px;display:flex;justify-content:center;align-items:flex-start;}" +
+                ".container{background:#fff;padding:40px 48px;border-radius:20px;max-width:640px;width:100%;border:1px solid #e1e1e1;box-shadow:0 18px 45px rgba(0,0,0,0.08);}" +
+                ".status-banner{display:flex;align-items:center;gap:8px;margin-bottom:24px;padding:12px 16px;border-radius:12px;font-size:0.95rem;font-weight:600;border:1px solid #c7d2fe;background:#eef2ff;color:#1e1b4b;}" +
+                ".status-banner.status-warning{background:#fff4e5;border-color:#ffd7a4;color:#6d3b00;}" +
+                ".status-banner.status-success{background:#ecfdf3;border-color:#bbf7d0;color:#14532d;}" +
+                ".status-banner.hidden{display:none;}h1{font-size:2.1rem;font-weight:700;letter-spacing:-0.03rem;color:#111;text-align:left;margin-bottom:36px;margin-top:12px;}" +
+                ".subtitle{margin-bottom:36px;font-size:1rem;color:#555;line-height:1.5;}" +
+                ".input-section{display:grid;gap:22px;}label{font-weight:600;color:#222;font-size:0.95rem;}" +
+                "input[type=number]{width:100%;padding:14px 16px;border:1px solid #cfcfcf;border-radius:10px;background:#fdfdfd;color:#111;font-size:1.05rem;}" +
+                "small{color:#777;font-size:0.82rem;}" +
+                ".checkbox-group{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;background:#f9f9f9;border:1px solid #e4e4e4;border-radius:12px;}" +
+                ".checkbox-group div{flex:1;}input[type=checkbox]{width:22px;height:22px;cursor:pointer;}" +
+                ".calculate-btn{margin-top:10px;width:100%;padding:15px;background:#111;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:600;}" +
+                ".preset-buttons{margin-top:28px;padding-top:20px;border-top:1px solid #ebebeb;}" +
+                ".preset-label{color:#333;font-size:0.92rem;margin-bottom:14px;font-weight:600;}" +
+                ".preset-btn{padding:10px 16px;background:#fff;color:#111;border:1px solid #cfcfcf;border-radius:8px;cursor:pointer;font-size:0.9rem;margin-right:10px;margin-bottom:10px;}" +
+                ".results{margin-top:36px;padding:28px;border:1px solid #dfdfdf;border-radius:14px;background:#fafafa;display:none;}" +
+                ".vram-total{font-size:1.8rem;font-weight:700;color:#111;text-align:center;margin-top:16px;padding:16px;background:#fff;border-radius:12px;border:1px solid #dfdfdf;}" +
+                ".error-message{color:#fff;background:#333;padding:18px;border-radius:12px;border:1px solid #111;}" +
+                ".footer{margin-top:40px;padding-top:20px;border-top:1px solid #ebebeb;text-align:center;}" +
+                ".footer p{color:#666;font-size:0.85rem;margin:4px 0;}" +
+                "@media(max-width:640px){body{padding:20px 14px;}.container{padding:32px 24px;}.preset-btn{width:100%;margin-right:0;}.checkbox-group{flex-direction:column;align-items:flex-start;}}";
+
+            var cssLink = document.getElementById('app-stylesheet');
+
+            function injectFallback() {
+                if (document.getElementById('fallback-style')) {
+                    return;
+                }
+                var tag = document.createElement('style');
+                tag.id = 'fallback-style';
+                tag.textContent = fallbackCSS;
+                document.head.appendChild(tag);
+            }
+
+            cssLink.addEventListener('error', injectFallback);
+
+            window.addEventListener('load', function () {
+                try {
+                    var rules = cssLink.sheet && cssLink.sheet.cssRules;
+                    if (!rules || rules.length === 0) {
+                        injectFallback();
+                    }
+                } catch (err) {
+                    injectFallback();
+                }
+            });
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
+        <div id="status-banner" class="status-banner hidden">
+            <span id="status-text" class="status-text">Checking backend status...</span>
+        </div>
         <h1>Stable Diffusion v1.5 VRAM Estimator</h1>
         <p class="subtitle">Advanced analytical prediction of peak vRAM usage for FP16 inference</p>
 

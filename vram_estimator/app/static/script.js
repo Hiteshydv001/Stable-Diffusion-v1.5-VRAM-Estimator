@@ -3,6 +3,85 @@
  * Handles API communication and dynamic UI updates
  */
 
+const statusBanner = document.getElementById('status-banner');
+const statusText = document.getElementById('status-text');
+let backendReady = false;
+let backendPollTimer;
+
+/**
+ * Show status updates while the Render backend warms up.
+ */
+function setStatus(message, variant = 'info', persist = true) {
+    if (!statusBanner || !statusText) {
+        return;
+    }
+    statusBanner.classList.remove('hidden', 'status-info', 'status-warning', 'status-success');
+    statusBanner.classList.add('status-' + variant);
+    statusText.textContent = message;
+    statusBanner.dataset.persist = persist ? 'true' : 'false';
+    if (!persist) {
+        hideStatusBanner();
+    }
+}
+
+function hideStatusBanner(delay = 2500) {
+    if (!statusBanner) {
+        return;
+    }
+    setTimeout(() => {
+        if (statusBanner.dataset.persist === 'true') {
+            return;
+        }
+        statusBanner.classList.add('hidden');
+    }, delay);
+}
+
+async function pollBackendOnce() {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 3500);
+    try {
+        const response = await fetch('/api/health', {
+            signal: controller.signal,
+            cache: 'no-store'
+        });
+        if (response.ok) {
+            backendReady = true;
+            setStatus('Render backend is ready. You can estimate now.', 'success', false);
+            if (backendPollTimer) {
+                window.clearInterval(backendPollTimer);
+                backendPollTimer = undefined;
+            }
+            return true;
+        }
+    } catch (error) {
+        // No-op: fall through to show warm-up message.
+    } finally {
+        window.clearTimeout(timeoutId);
+    }
+
+    backendReady = false;
+    setStatus('API is waking up on Render. First response can take ~30 seconds...', 'warning');
+    return false;
+}
+
+function ensureBackendPolling() {
+    if (backendPollTimer) {
+        return;
+    }
+    pollBackendOnce();
+    backendPollTimer = window.setInterval(() => {
+        if (backendReady) {
+            window.clearInterval(backendPollTimer);
+            backendPollTimer = undefined;
+            return;
+        }
+        pollBackendOnce();
+    }, 5000);
+}
+
+setStatus('Checking backend status...', 'info');
+ensureBackendPolling();
+
 /**
  * Set preset values for quick testing
  */
@@ -47,6 +126,11 @@ async function calculateVRAM() {
     }
 
     try {
+        if (!backendReady) {
+            setStatus('Render API is still warming up. Hang tight...', 'warning');
+            ensureBackendPolling();
+        }
+
         const response = await fetch('/api/estimate', {
             method: 'POST',
             headers: {
@@ -68,10 +152,15 @@ async function calculateVRAM() {
             return;
         }
 
+        backendReady = true;
+        setStatus('Prediction ready.', 'success', false);
         // Display successful results
         displayResults(data);
 
     } catch (error) {
+        backendReady = false;
+        ensureBackendPolling();
+        setStatus('Still waking the API on Render. Retry in a few seconds...', 'warning');
         showError(
             'API Connection Failed', 
             'Could not connect to the backend server. Please ensure the FastAPI server is running.'
