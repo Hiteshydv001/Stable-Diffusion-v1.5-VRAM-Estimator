@@ -24,14 +24,18 @@ M_{peak} = C_W + C_O + (C_L \cdot L) + \big( (N_{latent} \cdot K_{iter} \cdot K_
 
 | Term | Description | Notes |
 | --- | --- | --- |
-| \(C_W\) | Model weights | 2,132,400,000 bytes (FP16 UNet, VAE, CLIP) |
-| \(C_O\) | Framework overhead | 500,000,000 bytes (CUDA + buffers) |
-| \(C_L \cdot L\) | Prompt cache | 3,072 bytes per token, clipped to 77 |
-| \(N_{latent}\) | Latent pixels | \((H/8) \times (W/8)\) |
+## Highlights
+- Deterministic peak VRAM estimator derived from Stable Diffusion v1.5 architecture analysis.
+- FastAPI microservice with production-ready Docker image and strict CORS rules for hosted frontend.
+- Responsive JS frontend that auto-detects deployment target and falls back to inline styles when static assets are unreachable.
+- Ready-to-use Render (Docker) and Vercel configuration; Render cold-start banner guides users during wake-up.
 | \(K_{iter}\) | UNet iteration factor | 20,000 |
 | \(K_{attn}\) | Attention multiplier | 1.0 (optimized) / 1.25 (standard) |
 | \(M_{latent}\) | Latent storage | \(N_{latent} \times 4 \times 2\) bytes |
 
+├── Dockerfile                     # Backend container (Render-ready)
+├── vercel.json                    # Vercel static deployment config + proxy to backend static
+├── requirements.txt               # Global dependency lock (FastAPI stack)
 ---
 
 ## Repository Layout
@@ -48,6 +52,11 @@ M_{peak} = C_W + C_O + (C_L \cdot L) + \big( (N_{latent} \cdot K_{iter} \cdot K_
 │   │       ├── index.html         # UI
 │   │       ├── script.js          # API interaction + UX
 │   │       └── style.css          # Monochrome theme
+1. **Create virtualenv (recommended)**
+    ```powershell
+    python -m venv .venv
+    .\.venv\Scripts\Activate.ps1
+    ```
 │   └── requirements.txt           # Backend dependency list
 └── README.md
 ```
@@ -67,6 +76,7 @@ M_{peak} = C_W + C_O + (C_L \cdot L) + \big( (N_{latent} \cdot K_{iter} \cdot K_
    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
+    - Domain: `https://stable-diffusion-v1-5-vram-estimator.onrender.com` (used by the frontend loader).
 3. **Open the UI**
    Visit `http://localhost:8000/` to load the estimator page.
 
@@ -75,7 +85,6 @@ M_{peak} = C_W + C_O + (C_L \cdot L) + \big( (N_{latent} \cdot K_{iter} \cdot K_
    curl http://localhost:8000/api/health
    ```
 
----
 
 ## Deployment
 

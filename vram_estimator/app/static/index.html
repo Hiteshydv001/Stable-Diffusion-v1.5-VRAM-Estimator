@@ -7,6 +7,14 @@
     <link id="app-stylesheet" rel="stylesheet" href="/static/style.css">
     <script>
         (function () {
+            var isVercelHost = window.location.hostname.endsWith('vercel.app');
+            var apiBase = isVercelHost ? 'https://stable-diffusion-v1-5-vram-estimator.onrender.com' : '';
+            window.__API_BASE_URL__ = apiBase;
+            var staticBase = apiBase ? apiBase + '/static' : '/static';
+
+            var cssLink = document.getElementById('app-stylesheet');
+            cssLink.href = staticBase + '/style.css';
+
             var fallbackCSS = "*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter','Segoe UI',Tahoma,sans-serif;background:#f5f5f5;color:#111;min-height:100vh;padding:32px 16px;display:flex;justify-content:center;align-items:flex-start;}" +
                 ".container{background:#fff;padding:40px 48px;border-radius:20px;max-width:640px;width:100%;border:1px solid #e1e1e1;box-shadow:0 18px 45px rgba(0,0,0,0.08);}" +
                 ".status-banner{display:flex;align-items:center;gap:8px;margin-bottom:24px;padding:12px 16px;border-radius:12px;font-size:0.95rem;font-weight:600;border:1px solid #c7d2fe;background:#eef2ff;color:#1e1b4b;}" +
@@ -29,8 +37,6 @@
                 ".footer{margin-top:40px;padding-top:20px;border-top:1px solid #ebebeb;text-align:center;}" +
                 ".footer p{color:#666;font-size:0.85rem;margin:4px 0;}" +
                 "@media(max-width:640px){body{padding:20px 14px;}.container{padding:32px 24px;}.preset-btn{width:100%;margin-right:0;}.checkbox-group{flex-direction:column;align-items:flex-start;}}";
-
-            var cssLink = document.getElementById('app-stylesheet');
 
             function injectFallback() {
                 if (document.getElementById('fallback-style')) {
@@ -116,6 +122,17 @@
             </p>
         </div>
     </div>
-    <script src="/static/script.js"></script>
+    <script>
+        (function () {
+            var staticBase = (window.__API_BASE_URL__ ? window.__API_BASE_URL__ + '/static' : '/static');
+            var script = document.createElement('script');
+            script.src = staticBase + '/script.js';
+            script.defer = true;
+            script.onerror = function () {
+                console.error('VRAM estimator frontend script failed to load.');
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
 </body>
 </html>
