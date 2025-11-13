@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SD v1.5 VRAM Estimator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Stable Diffusion v1.5 VRAM Estimator</h1>
+        <p class="subtitle">Advanced analytical prediction of peak vRAM usage for FP16 inference</p>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label for="height">Image Height (pixels)</label>
+                <input type="number" id="height" value="512" min="64" step="8" placeholder="e.g., 512">
+                <small>Must be divisible by 8 (e.g., 512, 768, 1024, 2048)</small>
+            </div>
+
+            <div class="input-group">
+                <label for="width">Image Width (pixels)</label>
+                <input type="number" id="width" value="512" min="64" step="8" placeholder="e.g., 512">
+                <small>Must be divisible by 8 (e.g., 512, 768, 1024, 2048)</small>
+            </div>
+
+            <div class="input-group">
+                <label for="prompt_length">Prompt Length (tokens)</label>
+                <input type="number" id="prompt_length" value="77" min="1" max="77" placeholder="Max 77">
+                <small>Maximum 77 tokens (CLIP text encoder limit)</small>
+            </div>
+
+            <div class="input-group checkbox-group">
+                <div>
+                    <label for="optimization">Memory Optimization</label>
+                    <small>Enables linear-scaling attention (xFormers/PyTorch 2.0)</small>
+                </div>
+                <input type="checkbox" id="optimization" checked>
+            </div>
+
+            <button onclick="calculateVRAM()" class="calculate-btn">
+                <span>Calculate Peak VRAM</span>
+            </button>
+
+            <div class="preset-buttons">
+                <p class="preset-label">Quick Presets</p>
+                <button onclick="setPreset(512, 512, 77, true)" class="preset-btn">Standard 512×512</button>
+                <button onclick="setPreset(768, 768, 77, true)" class="preset-btn">HD 768×768</button>
+                <button onclick="setPreset(1024, 1024, 77, true)" class="preset-btn">XL 1024×1024</button>
+                <button onclick="setPreset(2048, 2048, 77, false)" class="preset-btn">Ultra 2048×2048</button>
+            </div>
+        </div>
+
+        <div class="results" id="results" style="display: none;">
+            <!-- Results will be displayed here -->
+        </div>
+
+        <div class="footer">
+            <p>Built with FastAPI | Powered by Advanced Analytical Modeling</p>
+            <p class="technical-note">
+                M<sub>peak</sub> = C<sub>W</sub> + C<sub>O</sub> + M<sub>L</sub> + PEAK_ACTIVATION(H, W)
+            </p>
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
