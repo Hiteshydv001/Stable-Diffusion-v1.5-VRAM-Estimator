@@ -1,16 +1,7 @@
-# --- Core Deep Learning Frameworks ---
-torch>=1.13.0 # PyTorch is required for tensors and GPU operations
-torchvision # Standard computer vision library, often paired with torch
-accelerate # Required by Diffusers/Hugging Face for optimization and GPU handling
-
-# --- Hugging Face & Diffusion Pipeline ---
-diffusers[torch]>=0.19.0 # The library providing the stable diffusion pipeline
-transformers>=4.26.0 # Required for the CLIP text encoder and tokenizer
-
-# --- Utility Libraries ---
-Pillow # Used by load_image and make_image_grid
-numpy
-
+# --- FastAPI stack ---
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 pydantic==2.7.4
+
+# --- Optional dependencies required by Starlette static file serving ---
+aiofiles>=23.2.1
