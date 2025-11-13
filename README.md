@@ -1,4 +1,3 @@
-dir app\static
 # Stable Diffusion v1.5 VRAM Estimator
 
 Modern toolkit for analytically predicting the peak GPU memory footprint of Stable Diffusion v1.5 inference (FP16). The project combines a FastAPI backend, a lightweight static frontend, and deployment scaffolding for Render (backend) and Vercel (frontend).
