@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 # --- ADVANCED VRAM ESTIMATION LOGIC (Simplified from notebook for API) ---
 
@@ -68,6 +69,23 @@ app = FastAPI(
     title="SD v1.5 VRAM Estimator",
     description="Analytical prediction of peak vRAM usage for Stable Diffusion v1.5 (FP16 inference)",
     version="1.0.0"
+)
+
+allowed_origins = [
+    "https://stable-diffusion-v1-5-vram-estimato.vercel.app",
+    "https://stable-diffusion-v1-5-vram-estimator.onrender.com",
+    "http://localhost",
+    "http://localhost:8000",
+    "http://127.0.0.1",
+    "http://127.0.0.1:8000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Mount the static files (HTML, CSS, JS) directory

@@ -7,6 +7,14 @@ const statusBanner = document.getElementById('status-banner');
 const statusText = document.getElementById('status-text');
 let backendReady = false;
 let backendPollTimer;
+const API_BASE_URL = window.__API_BASE_URL__ || (window.location.hostname.endsWith('vercel.app') ? 'https://stable-diffusion-v1-5-vram-estimator.onrender.com' : '');
+
+function apiUrl(path) {
+    if (!API_BASE_URL) {
+        return path;
+    }
+    return `${API_BASE_URL}${path}`;
+}
 
 /**
  * Show status updates while the Render backend warms up.
@@ -40,7 +48,7 @@ async function pollBackendOnce() {
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), 3500);
     try {
-        const response = await fetch('/api/health', {
+        const response = await fetch(apiUrl('/api/health'), {
             signal: controller.signal,
             cache: 'no-store'
         });
@@ -131,7 +139,7 @@ async function calculateVRAM() {
             ensureBackendPolling();
         }
 
-        const response = await fetch('/api/estimate', {
+        const response = await fetch(apiUrl('/api/estimate'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
